@@ -1,0 +1,4 @@
+# ProntoQA dataset configuration
+train_path: data/prontoqa_train.json
+val_path: data/prontoqa_valid.json
+num_epochs: 50

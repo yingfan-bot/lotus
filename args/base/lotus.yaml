@@ -1,0 +1,21 @@
+# Base configuration for Lotus training
+base: gpt2.yaml
+
+# Method: LOTUS looped latent training (set looped: True; cot: False)
+looped: True
+cot: False
+
+c_thought: 2  # Latent "thought" tokens per replaced reasoning step
+auto_c_thought: False  # If True, automatically set c_thought to max step length in dataset
+max_c_thought: 32  # Maximum cutoff for c_thought (used with auto_c_thought and intermediate supervision)
+intermediate_loss_weight: 0.0  # Weight for intermediate supervision loss
+grad_norm_clip: 1.0  # Gradient norm clipping (0 to disable)
+epochs_per_stage: 3  # Epochs before advancing to the next curriculum stage
+max_latent_stage: 3  # Max curriculum stage (how many CoT steps get replaced by latents)
+pad_latent_to_max: True  # Always use max_latent_stage latents (else cap at the sample's step count)
+single_latent_token: True  # Use one latent token instead of stage x c_thought tokens
+uniform_prob: 0.0  # Prob. of training a random stage instead of the scheduled one (0 = off)
+resume: 3  # Epoch to resume from (skips earlier epochs/stages)
+reset_optimizer: True  # Reset optimizer state when switching curriculum stages
+only_eval: False  # If True, only load a checkpoint and evaluate (no training)
+batch_size_training: 16

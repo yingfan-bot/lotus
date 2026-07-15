@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LOTUS &middot; Bridging the Gap Between Latent and Explicit Reasoning with Looped Transformers</title>
+  <meta name="description" content="LOTUS (Looped Transformers with parallel supervision on latents): the first latent-CoT method to bridge the gap to explicit chain-of-thought at the 3B scale, with a 2.5-6.9x faster thought phase and an interpretable, CoT-aligned latent space." />
+
+  <!-- Open Graph / Twitter card for link previews (absolute URLs for the public GitHub Pages site) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yingfan-bot.github.io/lotus/" />
+  <meta property="og:title" content="LOTUS: Bridging the Gap Between Latent and Explicit Reasoning with Looped Transformers" />
+  <meta property="og:description" content="The first latent-CoT method to bridge the gap to explicit chain-of-thought at the 3B scale, with a 2.5-6.9x faster thought phase and an interpretable latent space." />
+  <meta property="og:image" content="https://yingfan-bot.github.io/lotus/teaser.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="LOTUS: Bridging the Gap Between Latent and Explicit Reasoning with Looped Transformers" />
+  <meta name="twitter:description" content="The first latent-CoT method to bridge the gap to explicit chain-of-thought at the 3B scale, with a 2.5-6.9x faster thought phase and an interpretable latent space." />
+  <meta name="twitter:image" content="https://yingfan-bot.github.io/lotus/teaser.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans:400,500,600,700|Noto+Sans:400,600,700&display=swap" rel="stylesheet">
+
+  <!-- KaTeX for inline math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      renderMathInElement(document.body, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "$", right: "$", display: false },
+          { left: "\\(", right: "\\)", display: false },
+          { left: "\\[", right: "\\]", display: true }
+        ],
+        throwOnError: false
+      });
+    });
+  </script>
+
+  <style>
+    :root {
+      --accent: #b5121b;      /* deep red */
+      --accent-soft: #fdecec;
+      --ink: #1a1a1a;
+      --muted: #5c5c5c;
+      --line: #e6e6e6;
+      --bg: #ffffff;
+      --max: 860px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 22px; }
+
+    /* Hero */
+    header.hero {
+      text-align: center;
+      padding: 34px 22px 20px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--accent-soft), #fff 78%);
+    }
+    .venue {
+      display: inline-block;
+      font-size: 13px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+    h1.title {
+      font-family: 'Google Sans', 'Noto Sans', -apple-system, "Segoe UI", Roboto, sans-serif;
+      font-size: 1.6rem;
+      line-height: 1.25;
+      margin: 0 auto 12px;
+      max-width: 760px;
+      font-weight: 700;
+      letter-spacing: -.01em;
+    }
+    .authors { font-size: 1.08rem; margin: 6px 0 4px; }
+    .authors span { white-space: nowrap; }
+    .affil { color: var(--muted); font-size: .96rem; margin-bottom: 14px; }
+    .affil sup { color: var(--accent); }
+
+    /* Buttons */
+    .buttons { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 10px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--ink); color: #fff;
+      padding: 11px 20px; border-radius: 40px;
+      font-size: .96rem; font-weight: 600;
+      transition: transform .08s ease, background .15s ease;
+    }
+    .btn:hover { background: var(--accent); text-decoration: none; transform: translateY(-1px); }
+    .btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+    /* Sections */
+    section { padding: 26px 0; border-bottom: 1px solid var(--line); }
+    section:last-of-type { border-bottom: none; }
+    h2 {
+      font-family: 'Google Sans', 'Noto Sans', -apple-system, sans-serif; font-size: 1.2rem; margin: 0 0 18px; font-weight: 700; letter-spacing: -.01em;
+    }
+    h3 { font-family: 'Google Sans', 'Noto Sans', -apple-system, sans-serif; font-size: 1rem; font-weight: 700; margin: 28px 0 10px; }
+    h2::before { content: ""; display: inline-block; width: 26px; height: 4px;
+      background: var(--accent); border-radius: 3px; vertical-align: middle; margin-right: 12px; }
+    p { margin: 0 0 16px; }
+
+    /* Teaser */
+    .teaser figure { margin: 0; }
+    .teaser img { width: 100%; border: 1px solid var(--line); border-radius: 10px; display: block; }
+    .teaser figcaption { color: var(--muted); font-size: .92rem; text-align: center; margin-top: 12px; }
+    .placeholder {
+      width: 100%; aspect-ratio: 16 / 8; border: 2px dashed var(--line); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; text-align: center;
+      color: var(--muted); font-size: .95rem; padding: 20px; background: #fafafa;
+    }
+
+    /* TL;DR */
+    section.tldr { border-bottom: none; padding-bottom: 8px; }
+    .tldr-box { background: var(--accent-soft); border-radius: 12px; padding: 20px 24px; }
+    .tldr-box h2 { margin: 0 0 8px; }
+    .tldr-box p { margin: 0; }
+
+    /* Figures */
+    figure.fig { margin: 8px 0 0; }
+    figure.fig img { width: 100%; border: 1px solid var(--line); border-radius: 10px; display: block; background: #fff; }
+    figure.fig figcaption { color: var(--muted); font-size: .92rem; text-align: center; margin-top: 12px; line-height: 1.5; }
+
+    /* Results table */
+    .table-wrap { overflow-x: auto; }
+    table.results { width: 100%; border-collapse: collapse; font-size: .95rem; }
+    table.results th, table.results td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    table.results th:first-child, table.results td:first-child { text-align: left; }
+    table.results thead th { border-bottom: 2px solid var(--ink); font-weight: 700; }
+    table.results tbody tr.ours { background: var(--accent-soft); }
+    table.results tbody tr.ours td { font-weight: 700; }
+    table.results tbody tr.upper td { color: var(--muted); }
+    table.results.acc tbody tr.upper td { border-bottom: 2px dashed #b9b9b9; }
+    table.results tbody tr.mine { background: var(--accent-soft); }
+    table.results .pm { color: var(--muted); font-size: .8em; font-weight: 400; }
+    table.results caption { caption-side: bottom; color: var(--muted); font-size: .85rem; margin-top: 12px; text-align: left; line-height: 1.5; }
+
+    /* Highlights */
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 6px; }
+    .stat { background: var(--accent-soft); border-radius: 12px; padding: 22px 18px; text-align: center; }
+    .stat .num { font-size: 1.7rem; font-weight: 800; color: var(--accent); line-height: 1.1; }
+    .stat .lbl { font-size: .92rem; color: var(--muted); margin-top: 6px; }
+
+    /* Method list */
+    ol.ingredients { padding-left: 0; list-style: none; counter-reset: ing; margin: 0; }
+    ol.ingredients li { counter-increment: ing; position: relative; padding: 12px 0 12px 46px; border-top: 1px solid var(--line); }
+    ol.ingredients li:first-child { border-top: none; }
+    ol.ingredients li::before {
+      content: counter(ing); position: absolute; left: 0; top: 12px;
+      width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: #fff;
+      display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .95rem;
+    }
+
+    /* BibTeX */
+    pre {
+      background: #1a1a1a; color: #f2f2f2; padding: 20px; border-radius: 10px;
+      overflow-x: auto; font-size: .86rem; line-height: 1.55;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    }
+
+    footer { text-align: center; color: var(--muted); font-size: .88rem; padding: 30px 22px 46px; }
+    footer a { color: var(--muted); text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      h1.title { font-size: 1.45rem; }
+      body { font-size: 15px; }
+      .stats { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============ HERO ============ -->
+  <header class="hero">
+    <h1 class="title">Bridging the Gap Between Latent and Explicit Reasoning with Looped Transformers</h1>
+    <div class="authors">
+      <span>Ying Fan<sup>1</sup></span>,
+      <span>Anej Svete<sup>2</sup></span>,
+      <span>Kangwook Lee<sup>3,4</sup></span>
+    </div>
+    <div class="affil"><sup>1</sup>Microsoft Research &nbsp;&nbsp; <sup>2</sup>ETH Z&uuml;rich &nbsp;&nbsp; <sup>3</sup>KRAFTON &nbsp;&nbsp; <sup>4</sup>Ludo Robotics</div>
+
+    <div class="buttons">
+      <a class="btn" href="https://arxiv.org/abs/2606.31779" target="_blank" rel="noopener">
+        <svg viewBox="0 0 384 512"><path d="M320 464c8.8 0 16-7.2 16-16V160H256c-17.7 0-32-14.3-32-32V48H64c-8.8 0-16 7.2-16 16v384c0 8.8 7.2 16 16 16h256zM0 64C0 28.7 28.7 0 64 0h165.5c17 0 33.3 6.7 45.3 18.7l90.5 90.5c12 12 18.7 28.3 18.7 45.3V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V64z"/></svg>
+        Paper
+      </a>
+      <a class="btn" href="https://github.com/yingfan-bot/lotus" target="_blank" rel="noopener">
+        <svg viewBox="0 0 496 512"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8z"/></svg>
+        Code
+      </a>
+      <a class="btn" href="#bibtex">
+        BibTeX
+      </a>
+    </div>
+  </header>
+
+  <div class="wrap">
+
+    <!-- ============ TL;DR ============ -->
+    <section class="tldr">
+      <div class="tldr-box">
+        <h2>TL;DR</h2>
+        <p>
+          <strong>Looped Transformers</strong> are more than parameter-efficient recurrent-depth models. They provide a practical architecture for iterative reasoning over a <strong>parallel workspace</strong> and can be trained with surprisingly <strong>simple supervision</strong>, just plain cross-entropy loss. We instantiate this as
+          <strong>LOTUS</strong> (Looped Transformers with parallel supervision on latents). It is the <strong>first latent method</strong>
+          to match explicit CoT at the 3B scale on GSM8K while <strong>thinking
+          2.5&times;&ndash;6.9&times; faster</strong>, with latents that decode back into readable reasoning.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ TEASER ============ -->
+    <section class="teaser">
+      <figure>
+        <img src="teaser.png" alt="LOTUS matches explicit chain-of-thought on GSM8K while reasoning in latent space, and the gap holds as models scale from GPT-2 to Llama-3.2-3B." />
+        <figcaption>
+          <strong>LOTUS bridges the latent&ndash;explicit CoT accuracy gap across scale on GSM8K.</strong>
+          <strong>(a)</strong> Math-expression CoT: LOTUS tracks explicit CoT across scales, where prior latent
+          methods fall behind, and thinks <strong>2.5&times;</strong> faster than CoT at 3B.
+          <strong>(b)</strong> Natural-language CoT (3B): LOTUS matches explicit CoT and beats latent baselines,
+          thinking <strong>6.9&times;</strong> faster than CoT.
+        </figcaption>
+      </figure>
+    </section>
+
+    <!-- ============ TRAINING ============ -->
+    <section>
+      <h2>Training</h2>
+      <p>
+        LOTUS inserts $K$ latent blocks (each with $c$ tokens) between the question and answer, then loops the base model over
+        them $R$ times to get the post-loop latents. Every block is refined in parallel within each
+        iteration, so the thought phase no longer scales with the number of decoded reasoning tokens. After the
+        loop, every latent block is supervised in parallel, each aligned to its matching
+        CoT step. The answer is then supervised with standard next-token prediction conditioned on the post-loop latents.
+      </p>
+      <figure class="fig" style="margin: 6px 0 24px;">
+        <img src="lotus_method.png" alt="The LOTUS objective: a looped forward pass supervises K parallel latent blocks through the base LM head, then a final forward pass decodes the answer." />
+      </figure>
+    </section>
+
+    <!-- ============ INFERENCE ============ -->
+    <section>
+      <h2>Inference</h2>
+      <p>
+        At inference, we run the same looped forward, now without any losses, and
+        then decode the answer. The question's KV cache is computed once, the loop iterates $R$ times to fill
+        the $K$ latent blocks, and the answer is decoded autoregressively from those post-loop latents through
+        the base LM head. All the reasoning is carried by the parallel latent blocks, so the only
+        sequential decoding is the short answer suffix, the source of LOTUS's latency gains.
+      </p>
+      <figure class="fig">
+        <img src="lotus_inference.png" alt="At inference, we run the looped forward to fill the latent blocks, then decode the answer autoregressively from the post-loop latents." />
+      </figure>
+    </section>
+
+    <!-- ============ RESULTS ============ -->
+    <section>
+      <h2>Results</h2>
+      <p>
+        On <strong>Llama-3.2-3B-Instruct</strong>, LOTUS is the only latent method that stays with explicit
+        chain-of-thought, on compact <strong>math-expression</strong> reasoning <em>and</em> longer
+        <strong>natural-language</strong> reasoning, while thinking <strong>2.5&times;&ndash;6.9&times;</strong>
+        faster than CoT.
+      </p>
+
+      <h3>Math-expression CoT: accuracy</h3>
+      <div class="table-wrap">
+        <table class="results acc">
+          <caption>
+            Accuracy (%) on GSM8k-Aug (in-domain GSM8K) and OOD GSM-Hard / SVAMP, vs. latent-reasoning methods
+            (Llama-3.2-3B). LOTUS stays within ~1.5 points of explicit CoT and leads every latent baseline on all three.
+            <strong>Bold</strong> = best latent method.
+          </caption>
+          <thead>
+            <tr><th>Method</th><th>GSM8K</th><th>GSM-Hard</th><th>SVAMP</th></tr>
+          </thead>
+          <tbody>
+            <tr class="upper"><td>Explicit CoT</td><td>71.5</td><td>17.0</td><td>71.0</td></tr>
+            <tr><td>PCCoT</td><td>54.7</td><td>13.5</td><td>69.5</td></tr>
+            <tr><td>CODI</td><td>60.8</td><td>14.3</td><td>73.3</td></tr>
+            <tr><td>CODI + SIM-CoT</td><td>62.3</td><td>14.6</td><td>74.9</td></tr>
+            <tr><td>KaVa</td><td>65.7</td><td>15.2</td><td>72.7</td></tr>
+            <tr class="mine"><td><strong>LOTUS</strong></td><td><strong>70.0</strong></td><td><strong>16.0</strong></td><td><strong>75.7</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Math-expression CoT: thought latency</h3>
+      <div class="table-wrap">
+        <table class="results">
+          <caption>
+            Thought-phase latency (ms/example) on GSM8K (Llama-3.2-3B, batch size 1, greedy decoding,
+            NVIDIA H100 NVL). LOTUS computes its latent thought in parallel, <strong>2.5&times;</strong> faster than
+            explicit CoT.
+          </caption>
+          <thead>
+            <tr><th>Method</th><th>Thought (ms/example)</th></tr>
+          </thead>
+          <tbody>
+            <tr class="upper"><td>Explicit CoT</td><td>338.8 (1.0&times;)</td></tr>
+            <tr class="mine"><td><strong>LOTUS</strong></td><td><strong>133.0</strong> (<strong>2.5&times;</strong>)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Natural-language CoT: accuracy</h3>
+      <div class="table-wrap">
+        <table class="results acc">
+          <caption>
+            Accuracy (%) on the natural-language GSM8K stress test (Llama-3.2-3B), where each step is a full sentence.
+            LOTUS matches explicit CoT and beats every latent baseline, even topping explicit CoT on SVAMP.
+            <strong>Bold</strong> = best latent method.
+          </caption>
+          <thead>
+            <tr><th>Method</th><th>GSM8K</th><th>GSM-Hard</th><th>SVAMP</th></tr>
+          </thead>
+          <tbody>
+            <tr class="upper"><td>Explicit CoT</td><td>68.41<span class="pm">±0.59</span></td><td>18.27<span class="pm">±0.85</span></td><td>71.93<span class="pm">±1.62</span></td></tr>
+            <tr><td>PCCoT</td><td>47.6</td><td>11.0</td><td>65.2</td></tr>
+            <tr><td>CODI</td><td>55.9</td><td>13.6</td><td>70.1</td></tr>
+            <tr><td>KaVa</td><td>60.0</td><td>14.8</td><td>66.1</td></tr>
+            <tr class="mine"><td><strong>LOTUS</strong></td><td><strong>68.13</strong><span class="pm">±0.77</span></td><td><strong>16.27</strong><span class="pm">±0.19</span></td><td><strong>73.40</strong><span class="pm">±0.35</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Natural-language CoT: thought latency</h3>
+      <div class="table-wrap">
+        <table class="results">
+          <caption>
+            Thought-phase latency (ms/example) on the natural-language GSM8K test (Llama-3.2-3B). Longer chains make
+            explicit CoT much slower, so LOTUS's parallel latent reasoning is <strong>6.9&times;</strong> faster.
+          </caption>
+          <thead>
+            <tr><th>Method</th><th>Thought (ms/example)</th></tr>
+          </thead>
+          <tbody>
+            <tr class="upper"><td>Explicit CoT</td><td>963.6 (1.0&times;)</td></tr>
+            <tr class="mine"><td><strong>LOTUS</strong></td><td><strong>140.8</strong> (<strong>6.9&times;</strong>)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ ABLATIONS ============ -->
+    <section>
+      <h2>Ablations</h2>
+      <p>
+        LOTUS needs enough of <em>both</em> axes of its latent budget, <strong>sequential loop depth</strong>
+        ($R$) and <strong>parallel width</strong> per block ($c$), and parallel supervision through
+        the base LM head is equally essential. Accuracy climbs with each axis and saturates around
+        $R=6$, $c=25$. We keep the number of latent blocks $K$ fixed.
+      </p>
+      <figure class="fig">
+        <img src="ablation.png" alt="GSM8K accuracy rises with both the number of looped iterations R and the number of latent tokens per block c, on Llama-3.2-3B." />
+        <figcaption>
+          <strong>(a)</strong> Looped iterations $R$ (sequential depth) and <strong>(b)</strong> latent tokens per
+          block $c$ (parallel width) on Llama-3.2-3B: each lifts GSM8K accuracy, saturating around
+          $R=6$ and $c=25$.
+        </figcaption>
+      </figure>
+      <p style="margin-top:22px;">
+        The same budget can also be <strong>dialed at inference without retraining</strong>: accuracy degrades
+        gracefully below the trained setting and plateaus above it, so test-time compute can be traded for accuracy.
+      </p>
+      <figure class="fig">
+        <img src="ablation_infer.png" alt="At inference, GSM8K accuracy varies smoothly with the number of looped iterations R and latent tokens per block c, without retraining." />
+        <figcaption>
+          <strong>Inference-time</strong> sweeps (no retraining) on Llama-3.2-3B. <strong>(a)</strong> Looped iterations
+          $R$: accuracy climbs to the trained $R=6$ and holds beyond it. <strong>(b)</strong>
+          Latent tokens per block $c$: accuracy rises to the trained $c=25$ and plateaus, while
+          thought latency grows only modestly.
+        </figcaption>
+      </figure>
+    </section>
+
+    <!-- ============ INTERPRETABILITY ============ -->
+    <section>
+      <h2>Interpretable latents</h2>
+      <p>
+        LOTUS's latent space isn't a black box. Projecting the post-loop hidden states through the base model's own
+        LM head <strong>decodes each latent block into human-readable reasoning</strong>, recovering the gold
+        CoT steps, and even surfacing <em>alternative</em> valid intermediate computations never seen at training
+        time. This is direct evidence that the latent representation is interpretable and CoT-aligned.
+      </p>
+      <figure class="fig">
+        <img src="latent_readout.png" alt="Decoding LOTUS's latent blocks through the LM head recovers human-readable reasoning steps that reach the correct answer." />
+        <figcaption>
+          Reading out LOTUS's latent blocks on a GSM8K example: each post-loop block $h^{(R)}$,
+          projected through $f_{\text{head}}$, decodes to a concrete reasoning step, converging to the correct
+          answer (<code>### 540</code>) after 6 iterations.
+        </figcaption>
+      </figure>
+    </section>
+
+    <!-- ============ BIBTEX ============ -->
+    <section id="bibtex">
+      <h2>BibTeX</h2>
+      <p>
+        For more details and additional interesting results, check out the
+        <a href="https://arxiv.org/abs/2606.31779" target="_blank" rel="noopener">paper</a>. If you find it useful,
+        please cite:
+      </p>
+      <pre>@article{fan2026bridging,
+  title={Bridging the Gap Between Latent and Explicit Reasoning with Looped Transformers},
+  author={Fan, Ying and Svete, Anej and Lee, Kangwook},
+  journal={arXiv preprint arXiv:2606.31779},
+  year={2026}
+}</pre>
+    </section>
+
+  </div>
+
+</body>
+</html>

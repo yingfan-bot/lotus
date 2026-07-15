@@ -1,0 +1,39 @@
+# GSM8K Lotus with Llama 3.2 1B
+# Full fine-tuning with memory-optimized efficient_forward
+base:
+  - base/lotus.yaml
+  - base/datasets/gsm8k.yaml
+
+val_path: ./data/gsm_valid.json
+name: gsm-lotus-llama1b-new
+
+# Override model to Llama 1B Instruct
+model_id: meta-llama/Llama-3.2-1B-Instruct
+
+# Pretrained CoT checkpoint on Hugging Face (Stage-1 init). Or use your own
+# Stage-1 output, e.g. ./outputs/gsm-cot-llama1b/checkpoint_final.
+load_model_path: yingfanbot/gsm-cot-llama1b
+
+# Looped architecture settings
+fixed_latent_tokens: 0
+c_thought: 25
+max_c_thought: 25
+single_latent_token: False
+
+# Curriculum: slower progression
+epochs_per_stage: 1
+max_latent_stage: 6
+
+# Intermediate supervision
+intermediate_loss_weight: 0.05
+
+# Training settings
+num_epochs: 100
+resume: 0
+bf16: True  # Llama requires bf16
+auto_c_thought: False
+cumulative_stages: False
+reset_optimizer: False
+
+# Overall batch = 128 = 32 x 4 GPUs, so use NPROC_PER_NODE=4
+batch_size_training: 32

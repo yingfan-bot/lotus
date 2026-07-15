@@ -1,0 +1,5 @@
+# ProsQA dataset configuration
+train_path: ./data/prosqa_train.json
+val_path: ./data/prosqa_valid.json
+test_path: ./data/prosqa_test.json  # Path to test set for final evaluation (optional)
+num_epochs: 200

@@ -1,0 +1,15 @@
+# GSM8K CoT training with GPT-2 (small) — Stage 1 for the GPT-2 LOTUS recipe.
+# This is the recipe used to produce the published CoT checkpoint
+# (Hugging Face: yingfanbot/gsm-cot-gpt2), which the GPT-2 LOTUS config loads from.
+base:
+  - base/cot.yaml
+  - base/datasets/gsm8k.yaml
+
+model_id: openai-community/gpt2
+val_path: ./data/gsm_valid.json
+name: gsm-cot-gpt2
+bf16: False
+num_epochs: 100
+resume: 0
+# Overall batch = 128 = 64 x 2 GPUs, so use NPROC_PER_NODE=2
+batch_size_training: 64

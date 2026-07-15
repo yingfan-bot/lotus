@@ -1,0 +1,17 @@
+# Base configuration for CoT training
+base: gpt2.yaml
+
+# Method: plain CoT supervised fine-tuning (Stage 1) — no latent tokens
+cot: True
+looped: False
+
+c_thought: 0
+epochs_per_stage: 1
+max_latent_stage: 0
+pad_latent_to_max: True
+single_latent_token: False
+uniform_prob: 0.0
+load_model_path: None
+resume: 0
+reset_optimizer: False
+only_eval: False

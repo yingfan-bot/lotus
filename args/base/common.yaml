@@ -1,0 +1,18 @@
+# Base configuration shared across all experiments
+project: lotus
+entity: null  # Set to your WandB entity/team name, or leave null.
+save_path: ./outputs
+
+# Default training settings
+seed: 0
+debug: False
+bf16: True
+weight_decay: 0.01
+lr: !!float "1e-4"
+allow_resume_from_checkpoint: False
+
+# Default method flags
+looped: False
+cot: False
+no_thoughts: False
+no_cot: False

@@ -1,0 +1,5 @@
+# GSM8K dataset configuration
+train_path: ./data/gsm_train.json
+val_path: ./data/gsm_valid.json
+test_path: ./data/gsm_test.json
+num_epochs: 25

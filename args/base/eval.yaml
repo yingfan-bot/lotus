@@ -1,0 +1,4 @@
+# Base configuration for evaluation
+only_eval: True
+bf16: False
+batch_size_training: 32

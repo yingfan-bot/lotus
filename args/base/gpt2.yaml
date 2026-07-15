@@ -1,0 +1,5 @@
+# Base configuration for GPT2 model
+base: common.yaml
+
+model_id: openai-community/gpt2
+batch_size_training: 32

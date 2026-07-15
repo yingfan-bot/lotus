@@ -1,0 +1,22 @@
+# GSM8K CoT training with Llama 3.2 3B
+# Full fine-tuning, bf16 mixed precision
+base:
+  - base/cot.yaml
+  - base/datasets/gsm8k.yaml
+
+# Override model to Llama 3B Instruct
+model_id: meta-llama/Llama-3.2-3B-Instruct
+val_path: ./data/gsm_valid.json
+train_path: ./data/gsm_train.json
+name: gsm-cot-llama3b
+# Precision
+bf16: True
+
+# Training settings
+num_epochs: 10
+resume: 0
+lr: !!float "5e-5"
+weight_decay: 0.01
+
+# Overall batch = 128 = 32 x 4 GPUs, so use NPROC_PER_NODE=4
+batch_size_training: 32

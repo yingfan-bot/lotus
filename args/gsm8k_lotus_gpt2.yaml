@@ -1,0 +1,58 @@
+# GSM8K Lotus with GPT-2
+base:
+  - base/lotus.yaml
+  - base/datasets/gsm8k.yaml
+
+val_path: ./data/gsm_valid.json
+name: gsm-lotus-gpt2
+
+# Model
+model_id: openai-community/gpt2
+bf16: False
+
+# Pretrained CoT checkpoint (Stage-1 init). Defaults to the published GPT-2 CoT
+# checkpoint on Hugging Face; or use your Stage-1 output, e.g.
+# ./outputs/gsm-cot-gpt2/checkpoint_final (see args/gsm8k_cot_gpt2.yaml).
+load_model_path: yingfanbot/gsm-cot-gpt2
+# Teacher for CODI distillation (only loaded when codi_loss_weight > 0).
+teacher_model_path: yingfanbot/gsm-cot-gpt2
+
+# Looped architecture settings
+fixed_latent_tokens: 0
+c_thought: 13
+max_c_thought: 13
+single_latent_token: False
+pad_latent_to_max: True
+
+# Curriculum
+epochs_per_stage: 1
+max_latent_stage: 6
+
+# Intermediate supervision
+intermediate_loss_weight: 0.05
+freeze_supervised_blocks: False
+intermediate_loss_after_loop: True
+flat_intermediate_supervision: False
+
+# No IA / CODI distillation (answer loss is plain cross-entropy)
+inter_answer_loss_weight: 0.0
+codi_loss_weight: 0.0
+
+# Training settings
+lr: !!float "1e-4"
+lr_schedule: constant
+lr_min_ratio: 0.0
+num_epochs: 30
+resume: 0
+auto_c_thought: False
+cumulative_stages: False
+reset_optimizer: False
+uniform_prob: 0.0
+
+# Checkpointing
+save_every_epochs: 1
+allow_resume_from_checkpoint: False
+
+# Overall batch = 128 = 64 x 2 GPUs, so use NPROC_PER_NODE=2
+batch_size_training: 64
+grad_norm_clip: 1.0

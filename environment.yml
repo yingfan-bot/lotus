@@ -1,0 +1,21 @@
+# Conda environment mirroring the NGC PyTorch image (nvcr.io/nvidia/pytorch:25.03-py3):
+#   Python 3.12, PyTorch 2.7 + CUDA 12.8.
+#
+# Usage (from the repository root):
+#   conda env create -f environment.yml
+#   conda activate lotus
+#
+# If your GPU driver needs a different CUDA version, change the `cu128` wheel index
+# below (e.g. cu126) to a build listed at https://pytorch.org/get-started/locally/.
+name: lotus
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - pip:
+      # CUDA-matched PyTorch build (NGC 25.03 ships torch 2.7.0a0 / CUDA 12.8).
+      - --extra-index-url https://download.pytorch.org/whl/cu128
+      - torch==2.7.0
+      # Remaining runtime dependencies (single source of truth: requirements.txt).
+      - -r requirements.txt
