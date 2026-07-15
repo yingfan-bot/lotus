@@ -4,17 +4,17 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>LOTUS &middot; Bridging the Gap Between Latent and Explicit Reasoning with Looped Transformers</title>
-  <meta name="description" content="LOTUS (Looped Transformers with parallel supervision on latents): the first latent-CoT method to bridge the gap to explicit chain-of-thought at the 3B scale, with a 2.5-6.9x faster thought phase and an interpretable, CoT-aligned latent space." />
+  <meta name="description" content="LOTUS: a looped Transformer that reasons over parallel latent blocks with simple cross-entropy supervision. The first latent-CoT method to match explicit chain-of-thought at the 3B scale, thinking 2.5-6.9x faster." />
 
   <!-- Open Graph / Twitter card for link previews (absolute URLs for the public GitHub Pages site) -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://yingfan-bot.github.io/lotus/" />
   <meta property="og:title" content="LOTUS: Bridging the Gap Between Latent and Explicit Reasoning with Looped Transformers" />
-  <meta property="og:description" content="The first latent-CoT method to bridge the gap to explicit chain-of-thought at the 3B scale, with a 2.5-6.9x faster thought phase and an interpretable latent space." />
+  <meta property="og:description" content="LOTUS: a looped Transformer that reasons over parallel latent blocks with simple cross-entropy supervision. The first latent-CoT method to match explicit chain-of-thought at the 3B scale, thinking 2.5-6.9x faster." />
   <meta property="og:image" content="https://yingfan-bot.github.io/lotus/teaser.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="LOTUS: Bridging the Gap Between Latent and Explicit Reasoning with Looped Transformers" />
-  <meta name="twitter:description" content="The first latent-CoT method to bridge the gap to explicit chain-of-thought at the 3B scale, with a 2.5-6.9x faster thought phase and an interpretable latent space." />
+  <meta name="twitter:description" content="LOTUS: a looped Transformer that reasons over parallel latent blocks with simple cross-entropy supervision. The first latent-CoT method to match explicit chain-of-thought at the 3B scale, thinking 2.5-6.9x faster." />
   <meta name="twitter:image" content="https://yingfan-bot.github.io/lotus/teaser.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -68,7 +68,7 @@
       text-align: center;
       padding: 34px 22px 20px;
       border-bottom: 1px solid var(--line);
-      background: linear-gradient(180deg, var(--accent-soft), #fff 78%);
+      background: linear-gradient(180deg, #f1f1f3, #fff 78%);
     }
     .venue {
       display: inline-block;
@@ -91,7 +91,7 @@
     .authors { font-size: 1.08rem; margin: 6px 0 4px; }
     .authors span { white-space: nowrap; }
     .affil { color: var(--muted); font-size: .96rem; margin-bottom: 14px; }
-    .affil sup { color: var(--accent); }
+    .affil sup { color: var(--muted); }
 
     /* Buttons */
     .buttons { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 10px; }
@@ -128,8 +128,9 @@
 
     /* TL;DR */
     section.tldr { border-bottom: none; padding-bottom: 8px; }
-    .tldr-box { background: var(--accent-soft); border-radius: 12px; padding: 20px 24px; }
+    .tldr-box { background: #f1f1f3; border-radius: 12px; padding: 20px 24px; }
     .tldr-box h2 { margin: 0 0 8px; }
+    .tldr-box h2::before { background: #c2c2c9; }
     .tldr-box p { margin: 0; }
 
     /* Figures */
