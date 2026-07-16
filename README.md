@@ -3,7 +3,7 @@
 This project is for the paper: [Bridging the Gap Between Latent and Explicit Reasoning with Looped Transformers](https://arxiv.org/abs/2606.31779).
 
 <!-- Project Page URL assumes GitHub Pages is enabled (Settings -> Pages -> deploy from branch: main, folder: /docs) on the public yingfan-bot/lotus repo. -->
-🔗 **[Project Page](https://yingfan-bot.github.io/lotus/)** &nbsp;·&nbsp; 📄 **[arXiv](https://arxiv.org/abs/2606.31779)** &nbsp;·&nbsp; 🤗 **[Models &amp; collection](https://huggingface.co/collections/yingfanbot/looped-padded-6a552f7ef667cb41db2431a3)**
+🔗 **[Project Page](https://yingfan-bot.github.io/lotus/)** &nbsp;·&nbsp; 📄 **[arXiv](https://arxiv.org/abs/2606.31779)** &nbsp;·&nbsp; 🤗 **[Models &amp; collection](https://huggingface.co/collections/yingfanbot/looped-padded-6a552f7ef667cb41db2431a3)** &nbsp;·&nbsp; 𝕏 **[Summary](https://x.com/yingfan_bot/status/2077441955202482419)**
 
 ## Repository layout
 
