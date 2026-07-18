@@ -219,7 +219,7 @@ base model).
 
 ## Citation
 
-If you use this code, please cite LOTUS:
+If you find it useful, please cite:
 
 ```bibtex
 @article{fan2026bridging,
